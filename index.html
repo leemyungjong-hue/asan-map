@@ -59,10 +59,13 @@ text-shadow: 0 1px 3px rgba(0,0,0,0.8); pointer-events: none;
 letter-spacing: -0.3px;
 }
 
+/* 30% 확대 및 화면 축소 시 글자 크기도 같이 줄어들도록 반응형(clamp) 적용 */
 .zone-label {
-background: transparent; color: #ffffff; font-weight: 900; font-size: 13px;
+background: transparent; color: #ffffff; font-weight: 900;
+font-size: clamp(8px, 2.2vw, 17px);
 text-shadow: 0 0 6px rgba(0,0,0,0.9), 0 2px 4px rgba(0,0,0,0.9);
 text-align: center; white-space: nowrap;
+transform: translate(-50%, -50%);
 }
 
 #crosshair {
@@ -87,12 +90,12 @@ box-shadow: 0 8px 25px rgba(249, 115, 22, 0.6); cursor: pointer;
 display: flex; align-items: center; justify-content: center;
 }
 </style>
-<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=fs946skmco&v=20261022"></script>
+<!-- 캐시 무시용 버전 번호 갱신 (v3) -->
+<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=fs946skmco&v=20261022-v3"></script>
 </head>
 <body>
 <div id="title">아산출고 치장장 MAP</div>
 
-<!-- 인라인 스타일로 화면 중앙에 완벽 고정되는 오버레이 박스 -->
 <div id="welcome-guide-overlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); z-index:999999; display:flex; align-items:center; justify-content:center;">
 <div style="background:rgba(15,23,42,0.96); border:2px solid rgba(52,211,153,0.9); border-radius:22px; padding:26px 22px; width:88%; max-width:340px; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,0.9);">
 <p style="margin:0 0 18px 0; color:#f8fafc; font-size:14px; font-weight:600; line-height:1.6; word-break:keep-all;">우측 하단 빨간 버튼을 누르면 현재 위치가 표시되며 로케이션 검색시 길안내가 시작됩니다</p>
@@ -108,7 +111,6 @@ display: flex; align-items: center; justify-content: center;
 <button id="search-btn" onclick="searchLocation()">로케이션 검색</button>
 </div>
 
-<!-- 길안내 취소 버튼 -->
 <button id="cancel-nav-btn" onclick="cancelNavigation()">❌ 길안내 취소</button>
 
 <div id="status">GPS 연결 대기 중...</div>
@@ -217,7 +219,7 @@ map: map,
 position: new naver.maps.LatLng(z.label[0], z.label[1]),
 icon: {
 content: '<div class="zone-label">' + z.name + '</div>',
-anchor: new naver.maps.Point(15, 10)
+anchor: new naver.maps.Point(0, 0)
 }
 });
 } catch(err) {}
