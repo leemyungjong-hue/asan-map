@@ -36,7 +36,7 @@ box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5);
 flex-shrink: 0;
 }
 
-/* 길안내 취소 버튼 (평소엔 안 보임, 녹색선 활성화 시에만 등장) */
+/* 길안내 취소 버튼 (녹색선 활성화 시에만 등장) */
 #cancel-nav-btn {
 position: absolute; top: 104px; left: 16px; right: 16px; z-index: 1000;
 background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; border: none;
@@ -45,7 +45,7 @@ box-shadow: 0 4px 15px rgba(239, 68, 68, 0.5); cursor: pointer; text-align: cent
 display: none;
 }
 
-/* GPS 수신 중 배너 위치를 위로 올림 */
+/* GPS 수신 중 배너 위치 */
 #status {
 position: absolute; bottom: 56px; left: 16px; z-index: 1000;
 background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
@@ -99,11 +99,11 @@ display: flex; align-items: center; justify-content: center;
 <button id="coord-btn" onclick="getCenterCoord()">🎯 현재 화면 중앙 좌표 따기</button>
 
 <div id="search-box">
-<input type="text" id="search-input" placeholder="검색 예: Y1001, Y1101">
+<input type="text" id="search-input" placeholder="검색 예: Y1001, Y 1001" oninput="this.value = this.value.toUpperCase()">
 <button id="search-btn" onclick="searchLocation()">로케이션 검색</button>
 </div>
 
-<!-- 길안내 취소 버튼 (선이 활성화될 때만 나타남) -->
+<!-- 길안내 취소 버튼 -->
 <button id="cancel-nav-btn" onclick="cancelNavigation()">❌ 길안내 취소</button>
 
 <div id="status">GPS 연결 대기 중...</div>
@@ -224,7 +224,13 @@ e => { statusDiv.innerHTML = "GPS 오류: " + e.message; },
 }
 
 function parseY1Location(query) {
-var match = query.match(/^Y(10|11)(\d{2})$/);
+// 1. 대소문자 변환 및 모든 공백 제거
+var cleanQuery = query.toUpperCase().replace(/\s+/g, '');
+
+// 2. 'X' 문자 무시 처리 (예: YX2030 -> Y2030)
+cleanQuery = cleanQuery.replace(/X/g, '');
+
+var match = cleanQuery.match(/^Y(10|11)(\d{2})$/);
 if (!match) return null;
 var sideType = match[1];
 var num = parseInt(match[2], 10);
@@ -238,10 +244,10 @@ return new naver.maps.LatLng(targetLat, targetLng);
 }
 
 function searchLocation() {
-var query = document.getElementById('search-input').value.trim().toUpperCase();
-var targetCoord = parseY1Location(query);
+var rawInput = document.getElementById('search-input').value.trim();
+var targetCoord = parseY1Location(rawInput);
 if (!targetCoord) {
-alert("올바르지 않은 형식입니다: " + query + "\n(입력 예시: Y1001~Y1055, Y1101~Y1155)");
+alert("올바르지 않은 형식입니다: " + rawInput + "\n(입력 예시: Y1001~Y1055, Y1101~Y1155)");
 return;
 }
 window.activeTarget = targetCoord;
@@ -257,7 +263,7 @@ anchor: new naver.maps.Point(12, 24)
 map.setCenter(targetCoord);
 map.setZoom(19);
 
-// 녹색선이 생성되므로 길안내 취소 버튼 표시
+// 길안내 취소 버튼 표시
 document.getElementById('cancel-nav-btn').style.display = 'block';
 
 if (currentPos) drawNavLine(currentPos, targetCoord);
@@ -274,7 +280,7 @@ strokeOpacity: 0.9
 });
 }
 
-// 길안내 취소 함수 (버튼 숨김 및 마커/선 제거)
+// 길안내 취소 함수
 function cancelNavigation() {
 window.activeTarget = null;
 if (targetMarker) {
