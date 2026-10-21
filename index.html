@@ -59,7 +59,7 @@ text-shadow: 0 1px 3px rgba(0,0,0,0.8); pointer-events: none;
 letter-spacing: -0.3px;
 }
 
-/* 구역명칭 스타일: 하얀색(#ffffff), 굵은 볼드체, 완벽한 정중앙 정렬 */
+/* 구역명칭 스타일: 하얀색(#ffffff) 및 굵은 볼드체 유지 */
 .zone-label {
 background: transparent; color: #ffffff; font-weight: 800;
 font-size: 13px;
@@ -91,8 +91,8 @@ box-shadow: 0 8px 25px rgba(249, 115, 22, 0.6); cursor: pointer;
 display: flex; align-items: center; justify-content: center;
 }
 </style>
-<!-- 캐시 무시용 버전 번호 갱신 (v8) -->
-<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=fs946skmco&v=20261022-v8"></script>
+<!-- 캐시 무시용 버전 번호 갱신 (v9) -->
+<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=fs946skmco&v=20261022-v9"></script>
 </head>
 <body>
 <div id="title">아산출고 치장장 MAP</div>
@@ -198,7 +198,7 @@ var zones = [
 {name:"HB", coords:[[36.84863,126.86815],[36.850166,126.86815],[36.850166,126.86935],[36.84863,126.86935]], label:[36.84940,126.86875]},
 {name:"N", coords:[[36.84592,126.8653],[36.84592,126.86722],[36.84455,126.86722],[36.84455,126.8668],[36.84580,126.8653]], label:[36.84523,126.86626]},
 {name:"M", coords:[[36.84592,126.8672],[36.84592,126.8687],[36.8445,126.8687],[36.8445,126.8672]], label:[36.84521,126.86795]},
-{name: "L", coords:[[36.84592,126.8687],[36.84592,126.8702],[36.8442,126.8702],[36.8442,126.8692],[36.8445,126.8692],[36.84592,126.8687]], label:[36.84506,126.86945]}
+{name: "L", coords:[[36.84592,126.8687],[36.84592,126.8702],[36.8442,126.8702],[36.8442,126.8692],[36.8445,126.8692],[36.8445,126.8687]], label:[36.84506,126.86945]}
 ];
 
 zones.forEach(z => {
@@ -232,7 +232,7 @@ labelElements.push(labelDiv);
 } catch(err) {}
 });
 
-/* 책임님 지시하신 줌 레벨별 폰트 크기 및 투명도 규칙 적용 */
+/* 책임님께서 지정해주신 줌 레벨별 폰트 크기 및 투명도 규칙 */
 function updateLabelSizes() {
 var zoom = map.getZoom();
 var fontSize = 13;
@@ -248,8 +248,7 @@ opacity = 1;
 fontSize = 5;
 opacity = 1;
 } else {
-// 줌 12 이하인 경우 투명 처리로 안 보이게 숨김
-opacity = 0;
+opacity = 0; // 줌 12 이하일 때 투명 처리로 안 보이게 숨김
 }
 
 labelElements.forEach(el => {
