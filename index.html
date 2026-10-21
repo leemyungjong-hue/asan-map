@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>아산출고 치장장 MAP</title>
-<!-- 네이버 지도 API v3 (새 Client ID 적용) -->
-<script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=Fs946skmco&submodules=geocoder&callback=initMap"></script>
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
 • { box-sizing: border-box; }
 html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#1e293b; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -47,7 +47,7 @@ box-shadow: 0 6px 25px rgba(0,0,0,0.6);
 }
 
 .zone-label-div {
-color: #ffffff; font-weight: 900; font-size: 14px;
+background: transparent; color: #ffffff; font-weight: 900; font-size: 14px;
 text-shadow: 0 0 6px rgba(0,0,0,0.9), 0 2px 4px rgba(0,0,0,0.9);
 text-align: center; white-space: nowrap;
 }
@@ -74,6 +74,8 @@ box-shadow: 0 8px 25px rgba(249, 115, 22, 0.6); cursor: pointer;
 display: flex; align-items: center; justify-content: center;
 }
 </style>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 <div id="title">아산출고 치장장 MAP</div>
@@ -87,35 +89,32 @@ display: flex; align-items: center; justify-content: center;
 </div>
 
 <div id="status">GPS 연결 대기 중...</div>
-<button id="btn" onclick="if(currentPos) map.setCenter(currentPos);">📍</button>
+<button id="btn" onclick="if(currentPos) map.setView(currentPos, 19);">📍</button>
 <div id="map"></div>
 
 <script>
-var map, currentPos = null;
-var gpsMarker, targetMarker = null;
-var navLine = null;
-var statusDiv;
+var map = L.map('map', {
+zoomControl: false,
+attributionControl: false
+}).setView([36.8522, 126.8610], 18);
 
-function initMap() {
-statusDiv = document.getElementById('status');
-
-map = new naver.maps.Map('map', {
-center: new naver.maps.LatLng(36.8522, 126.8610),
-zoom: 18,
-minZoom: 10,
+// 국내 고해상도 위성 타일 적용 (V-World Satellite)
+L.tileLayer('https://api.vworld.kr/req/wmts/1.0.0/KEY_IS_NOT_NEEDED/Satellite/{z}/{y}/{x}.jpeg', {
 maxZoom: 21,
-mapTypeId: naver.maps.MapTypeId.SATELLITE,
-zoomControl: false
-});
+minZoom: 10
+}).addTo(map);
 
-gpsMarker = new naver.maps.Marker({
-position: new naver.maps.LatLng(0, 0),
-map: null,
-icon: {
-content: '<div style="width:18px;height:18px;background:#22c55e;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.5);"></div>',
-anchor: new naver.maps.Point(9, 9)
-}
+var currentPos = null;
+var gpsMarker = L.circleMarker([0, 0], {
+radius: 9,
+fillColor: '#22c55e',
+color: '#ffffff',
+weight: 3,
+fillOpacity: 1
 });
+var targetMarker = null;
+var navLine = null;
+var statusDiv = document.getElementById('status');
 
 var zoneStyles = {
 "PA": {color: "#38bdf8", fill: "#38bdf8"}, "P": {color: "#818cf8", fill: "#818cf8"},
@@ -153,44 +152,44 @@ var zones = [
 {name:"HB", coords:[[36.84863,126.86815],[36.8500,126.86815],[36.8500,126.86935],[36.84863,126.86935]], label:[36.8493,126.8688]},
 {name:"N", coords:[[36.84592,126.8653],[36.84592,126.86722],[36.84455,126.86722],[36.84455,126.8668],[36.84580,126.8653]], label:[36.8453,126.8666]},
 {name:"M", coords:[[36.84592,126.8672],[36.84592,126.8687],[36.8445,126.8687],[36.8445,126.8672]], label:[36.8453,126.8681]},
-{name:"L", coords:[[36.84592,126.8687],[36.84592,126.8702],[36.8442,126.8702],[36.8442,126.8692],[36.8445,126.8692],[36.8445,126.8687]], label:[36.8453,126.8695]}
+{name: "L", coords:[[36.84592,126.8687],[36.84592,126.8702],[36.8442,126.8702],[36.8442,126.8692],[36.8445,126.8692],[36.8445,126.8687]], label:[36.8453,126.8695]}
 ];
 
 zones.forEach(z => {
 try {
 var style = zoneStyles[z.name] || {color: "#facc15", fill: "#facc15"};
-var path = z.coords.map(c => new naver.maps.LatLng(c[0], c[1]));
+var latLngs = z.coords.map(c => [c[0], c[1]]);
 
-new naver.maps.Polygon({
-map: map, paths: path,
-strokeColor: style.color, strokeWeight: 2.5, strokeOpacity: 0.9,
-fillColor: style.fill, fillOpacity: 0.18
-});
+L.polygon(latLngs, {
+color: style.color,
+weight: 2.5,
+opacity: 0.9,
+fillColor: style.fill,
+fillOpacity: 0.18
+}).addTo(map);
 
-new naver.maps.Marker({
-position: new naver.maps.LatLng(z.label[0], z.label[1]),
-map: map,
-icon: {
-content: '<div class="zone-label-div">' + z.name + '</div>',
-anchor: new naver.maps.Point(15, 10)
-}
-});
+L.marker([z.label[0], z.label[1]], {
+icon: L.divIcon({
+className: 'zone-label-div',
+html: z.name,
+iconSize: [30, 20]
+})
+}).addTo(map);
 } catch(err) {}
 });
 
 if (navigator.geolocation) {
 navigator.geolocation.watchPosition(
 p => {
-currentPos = new naver.maps.LatLng(p.coords.latitude, p.coords.longitude);
-gpsMarker.setPosition(currentPos);
-if (!gpsMarker.getMap()) gpsMarker.setMap(map);
+currentPos = [p.coords.latitude, p.coords.longitude];
+gpsMarker.setLatLng(currentPos);
+if (!map.hasLayer(gpsMarker)) gpsMarker.addTo(map);
 statusDiv.innerHTML = "GPS 수신 중 (오차: " + Math.round(p.coords.accuracy) + "m)";
 if (window.activeTarget) drawNavLine(currentPos, window.activeTarget);
 },
 e => { statusDiv.innerHTML = "GPS 오류: " + e.message; },
 { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
 );
-}
 }
 
 function parseY1Location(query) {
@@ -204,7 +203,7 @@ var northLat = 36.8507;
 var ratio = (num - 1) / 54;
 var targetLat = southLat + (northLat - southLat) * ratio;
 var targetLng = (sideType === "10") ? 126.85867 : 126.85863;
-return new naver.maps.LatLng(targetLat, targetLng);
+return [targetLat, targetLng];
 }
 
 function searchLocation() {
@@ -215,31 +214,25 @@ alert("올바르지 않은 형식입니다: " + query + "\n(입력 예시: Y1001
 return;
 }
 window.activeTarget = targetCoord;
-if (targetMarker) targetMarker.setMap(null);
-targetMarker = new naver.maps.Marker({
-position: targetCoord,
-map: map
-});
-map.setCenter(targetCoord);
-map.setZoom(19);
+if (targetMarker) map.removeLayer(targetMarker);
+targetMarker = L.marker(targetCoord).addTo(map);
+map.setView(targetCoord, 19);
 if (currentPos) drawNavLine(currentPos, targetCoord);
 }
 
 function drawNavLine(start, end) {
-if (navLine) navLine.setMap(null);
-navLine = new naver.maps.Polyline({
-map: map,
-path: [start, end],
-strokeColor: '#22c55e',
-strokeWeight: 5,
-strokeOpacity: 0.9
-});
+if (navLine) map.removeLayer(navLine);
+navLine = L.polyline([start, end], {
+color: '#22c55e',
+weight: 5,
+opacity: 0.9
+}).addTo(map);
 }
 
 function getCenterCoord() {
 var center = map.getCenter();
-var lat = center.lat().toFixed(6);
-var lng = center.lng().toFixed(6);
+var lat = center.lat.toFixed(6);
+var lng = center.lng.toFixed(6);
 alert("중앙 좌표\n위도: " + lat + "\n경도: " + lng);
 }
 </script>
