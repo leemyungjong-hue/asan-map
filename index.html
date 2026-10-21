@@ -59,13 +59,14 @@ text-shadow: 0 1px 3px rgba(0,0,0,0.8); pointer-events: none;
 letter-spacing: -0.3px;
 }
 
-/* 30% 확대 및 화면 축소 시 글자 크기도 같이 줄어들도록 반응형(clamp) 적용 */
+/* 3배로 큼직하게 설정된 기본 구역명 스타일 (중앙 정렬 포함) /
 .zone-label {
 background: transparent; color: #ffffff; font-weight: 900;
-font-size: clamp(8px, 2.2vw, 17px);
+font-size: 39px; / 기본 크기를 대폭 확대 (기존 대비 약 3배) */
 text-shadow: 0 0 6px rgba(0,0,0,0.9), 0 2px 4px rgba(0,0,0,0.9);
 text-align: center; white-space: nowrap;
 transform: translate(-50%, -50%);
+transition: opacity 0.2s ease;
 }
 
 #crosshair {
@@ -90,8 +91,8 @@ box-shadow: 0 8px 25px rgba(249, 115, 22, 0.6); cursor: pointer;
 display: flex; align-items: center; justify-content: center;
 }
 </style>
-<!-- 캐시 무시용 버전 번호 갱신 (v3) -->
-<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=fs946skmco&v=20261022-v3"></script>
+<!-- 캐시 무시용 버전 번호 갱신 (v4) -->
+<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=fs946skmco&v=20261022-v4"></script>
 </head>
 <body>
 <div id="title">아산출고 치장장 MAP</div>
@@ -140,6 +141,7 @@ var targetMarker = null;
 var navLine = null;
 var statusDiv = document.getElementById('status');
 window.activeTarget = null;
+var labelElements = []; // 줌 레벨에 따라 글자 크기와 표시를 조절하기 위한 배열
 
 function closeGuide() {
 var overlay = document.getElementById('welcome-guide-overlay');
@@ -190,7 +192,7 @@ var zones = [
 {name:"JA", coords:[[36.85005,126.86602],[36.8509,126.86602],[36.8509,126.8678],[36.85005,126.8678]], label:[36.8504,126.8668]},
 {name:"J", coords:[[36.8500,126.86602],[36.84863,126.86602],[36.84863,126.8678],[36.8500,126.8678]], label:[36.8493,126.8669]},
 {name:"IA", coords:[[36.84785,126.86602],[36.8486,126.86602],[36.8486,126.8679],[36.84785,126.8679]], label:[36.8482,126.8668]},
-{name:"I", coords:[[36.8478,126.86602],[36.8478,126.8679],[36.84644,126.8679],[36.846442,126.867541],[36.8466326,126.867539],[36.8466326,126.866111],[36.846442,126.866111],[36.84644,126.86602]], label:[36.8471,126.8669]},
+{name:"I", coords:[[36.8478,126.86602],[36.8478,126.8679],[36.84644,126.8679],[36.846442,126.867541],[36.846367,126.867539],[36.846367,126.866111],[36.846442,126.866111],[36.84644,126.86602]], label:[36.8471,126.8669]},
 {name:"H", coords:[[36.84785,126.86815],[36.84785,126.86935],[36.8465,126.86935],[36.8465,126.86815]], label:[36.8472,126.8687]},
 {name:"HA", coords:[[36.8479,126.86815],[36.8486,126.86815],[36.8486,126.86935],[36.8479,126.86935]], label:[36.8482,126.8688]},
 {name:"HB", coords:[[36.84863,126.86815],[36.850166,126.86815],[36.850166,126.86935],[36.84863,126.86935]], label:[36.8493,126.8688]},
@@ -214,15 +216,34 @@ fillColor: style.fill,
 fillOpacity: 0.18
 });
 
+var labelDiv = document.createElement('div');
+labelDiv.className = 'zone-label';
+labelDiv.innerText = z.name;
+
 new naver.maps.Marker({
 map: map,
 position: new naver.maps.LatLng(z.label[0], z.label[1]),
 icon: {
-content: '<div class="zone-label">' + z.name + '</div>',
+content: labelDiv,
 anchor: new naver.maps.Point(0, 0)
 }
 });
+labelElements.push(labelDiv);
 } catch(err) {}
+});
+
+// 줌 레벨에 따라 글자 크기가 비례해서 줄어들고, 너무 작아지면 숨겨지도록 연동하는 이벤트
+naver.maps.Event.addListener(map, 'zoom_changed', function() {
+var zoom = map.getZoom();
+// 줌 17 이상일 때만 선명하게 보이고, 축소할수록 글자가 작아지며 15 이하로 축소되면 아예 숨김
+var scale = Math.pow(2, zoom - 18);
+var opacity = zoom < 16 ? 0 : 1;
+var fontSize = Math.max(10, Math.round(39 * scale));
+
+labelElements.forEach(el => {
+el.style.fontSize = fontSize + 'px';
+el.style.opacity = opacity;
+});
 });
 
 if (navigator.geolocation) {
