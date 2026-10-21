@@ -45,25 +45,26 @@ box-shadow: 0 4px 15px rgba(239, 68, 68, 0.5); cursor: pointer; text-align: cent
 display: none;
 }
 
-/* 화면 중앙(빨간 박스 위치)에 완벽하게 오도록 수정된 럭셔리 안내 박스 /
+/* 화면 중앙 강제 고정을 위한 럭셔리 안내 레이어 */
+#welcome-guide-overlay {
+position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+z-index: 999999; display: flex; align-items: center; justify-content: center;
+}
 #welcome-guide {
-position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 99999;
-background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+background: rgba(15, 23, 42, 0.96);
 border: 2px solid rgba(52, 211, 153, 0.9); border-radius: 22px;
 padding: 26px 22px; width: 88%; max-width: 340px; text-align: center;
-box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
-transition: opacity 0.3s ease, transform 0.3s ease;
+box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
 }
 #welcome-guide p {
 margin: 0 0 18px 0; color: #f8fafc; font-size: 14px; font-weight: 600; line-height: 1.6;
 word-break: keep-all;
 }
-/ 럭셔리 확인 버튼 */
 #guide-ok-btn {
 background: linear-gradient(135deg, #34d399, #059669); color: #ffffff; border: none;
 padding: 12px 0; width: 100%; border-radius: 12px; font-weight: 700; font-size: 14px;
 cursor: pointer; box-shadow: 0 4px 15px rgba(52, 211, 153, 0.5);
-transition: transform 0.1s ease, filter 0.1s ease;
 }
 #guide-ok-btn:active {
 transform: scale(0.98);
@@ -115,15 +116,18 @@ box-shadow: 0 8px 25px rgba(249, 115, 22, 0.6); cursor: pointer;
 display: flex; align-items: center; justify-content: center;
 }
 </style>
-<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=fs946skmco"></script>
+<!-- 캐시 무시용 버전 파라미터 추가 -->
+<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=fs946skmco&v=20261022"></script>
 </head>
 <body>
 <div id="title">아산출고 치장장 MAP</div>
 
-<!-- 화면 중앙(빨간 박스 위치)에 뜨는 럭셔리 안내 박스 -->
+<!-- 화면 중앙 강제 고정 안내 박스 오버레이 -->
+<div id="welcome-guide-overlay">
 <div id="welcome-guide">
 <p>우측 하단 빨간 버튼을 누르면 현재 위치가 표시되며 로케이션 검색시 길안내가 시작됩니다</p>
 <button id="guide-ok-btn" onclick="closeGuide()">확 인</button>
+</div>
 </div>
 
 <div id="crosshair">✚</div>
@@ -167,12 +171,12 @@ window.activeTarget = null;
 
 // 안내 박스 닫기 함수
 function closeGuide() {
-var guide = document.getElementById('welcome-guide');
-if (guide) {
-guide.style.opacity = '0';
-guide.style.transform = 'translate(-50%, -45%) scale(0.95)';
+var overlay = document.getElementById('welcome-guide-overlay');
+if (overlay) {
+overlay.style.opacity = '0';
+overlay.style.transition = 'opacity 0.3s ease';
 setTimeout(function() {
-guide.style.display = 'none';
+overlay.style.display = 'none';
 }, 300);
 }
 }
