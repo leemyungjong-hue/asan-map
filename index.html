@@ -45,24 +45,24 @@ box-shadow: 0 4px 15px rgba(239, 68, 68, 0.5); cursor: pointer; text-align: cent
 display: none;
 }
 
-/* 첫 접속 시 화면 중앙 럭셔리 안내 박스 (z-index를 최상단으로 격상) /
+/* 화면 중앙(빨간 박스 위치)에 완벽하게 오도록 수정된 럭셔리 안내 박스 /
 #welcome-guide {
-position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;
+position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 99999;
 background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-border: 1.5px solid rgba(52, 211, 153, 0.8); border-radius: 20px;
-padding: 24px 20px; width: 88%; max-width: 350px; text-align: center;
-box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+border: 2px solid rgba(52, 211, 153, 0.9); border-radius: 22px;
+padding: 26px 22px; width: 88%; max-width: 340px; text-align: center;
+box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
 transition: opacity 0.3s ease, transform 0.3s ease;
 }
 #welcome-guide p {
-margin: 0 0 16px 0; color: #f8fafc; font-size: 13.5px; font-weight: 600; line-height: 1.6;
+margin: 0 0 18px 0; color: #f8fafc; font-size: 14px; font-weight: 600; line-height: 1.6;
 word-break: keep-all;
 }
 / 럭셔리 확인 버튼 */
 #guide-ok-btn {
 background: linear-gradient(135deg, #34d399, #059669); color: #ffffff; border: none;
-padding: 11px 0; width: 100%; border-radius: 12px; font-weight: 700; font-size: 13.5px;
-cursor: pointer; box-shadow: 0 4px 15px rgba(52, 211, 153, 0.4);
+padding: 12px 0; width: 100%; border-radius: 12px; font-weight: 700; font-size: 14px;
+cursor: pointer; box-shadow: 0 4px 15px rgba(52, 211, 153, 0.5);
 transition: transform 0.1s ease, filter 0.1s ease;
 }
 #guide-ok-btn:active {
@@ -120,7 +120,7 @@ display: flex; align-items: center; justify-content: center;
 <body>
 <div id="title">아산출고 치장장 MAP</div>
 
-<!-- 첫 접속 시 화면 중앙 럭셔리 안내 박스 -->
+<!-- 화면 중앙(빨간 박스 위치)에 뜨는 럭셔리 안내 박스 -->
 <div id="welcome-guide">
 <p>우측 하단 빨간 버튼을 누르면 현재 위치가 표시되며 로케이션 검색시 길안내가 시작됩니다</p>
 <button id="guide-ok-btn" onclick="closeGuide()">확 인</button>
